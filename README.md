@@ -1,4 +1,4 @@
-## Code-Sync
+## Code-Sync 
 <p>A Realtime collaboration Code editor</p>
 
 ![image](https://user-images.githubusercontent.com/78805153/194740808-026f8a6d-3ed9-48ed-b41b-211f0115ce60.png)
