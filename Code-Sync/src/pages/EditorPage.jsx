@@ -1,3 +1,5 @@
+// EditorPage.jsx
+
 import React, { useEffect, useRef, useState } from 'react';
 import Client from '../components/Client';
 import Editor from '../components/Editor';
@@ -33,7 +35,6 @@ const EditorPage = () => {
         username: location.state?.username,
       });
 
-      // Listening for joined events
       socketRef.current.on(ACTIONS.JOINED, ({ clients, username, socketId }) => {
         if (username !== location.state?.username) {
           toast.success(`${username} joined the room.`);
@@ -45,25 +46,23 @@ const EditorPage = () => {
         });
       });
 
-      //listening for disconnected
       socketRef.current.on(ACTIONS.DISCONNECTED, ({ socketId, username }) => {
         toast.success(`${username} left the room.`);
         setClients((prev) => {
           return prev.filter((client) => client.socketId !== socketId);
         });
       });
-
     };
 
     init();
-    
+
     return () => {
       socketRef.current?.disconnect();
       socketRef.current?.off(ACTIONS.JOINED);
       socketRef.current?.off(ACTIONS.DISCONNECTED);
     };
 
-  }, []);
+  }, [roomId, location.state, reactNavigator]);
 
   async function copyRoomId() {
     try {
@@ -79,7 +78,7 @@ const EditorPage = () => {
   }
 
   if (!location.state) {
-    return <Navigate to="/"/>
+    return <Navigate to="/" />;
   }
 
   return (
