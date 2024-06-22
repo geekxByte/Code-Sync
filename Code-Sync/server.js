@@ -2,21 +2,24 @@ const express = require('express');
 const app = express();
 const http = require('http');
 const path = require('path');
+const cors = require('cors');
 const { Server } = require('socket.io');
 const ACTIONS = require('./src/Actions');
 
 const server = http.createServer(app);
-const io = new Server(server, {
-    cors: {
-        origin: "https://code-sync-olive.vercel.app",
-        methods: ["GET", "POST"]
-    }
-});
+const io = new Server(server);
+
+// Use CORS middleware
+app.use(cors({
+    origin: "https://code-sync-olive.vercel.app/",
+    methods: ["GET", "POST"],
+    allowedHeaders: ["Content-Type"],
+}));
 
 app.use(express.static('build'));
 app.use((req, res, next) => {
     res.sendFile(path.join(__dirname, 'build', 'index.html'));
-})
+});
 
 const userSocketMap = {};
 
