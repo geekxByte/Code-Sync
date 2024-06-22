@@ -8,7 +8,7 @@ export const initSocket = async () => {
     };
 
     try {
-        const socket = io(process.env.REACT_APP_BACKEND_URL, options);
+        const socket = io(https://code-sync-olive.vercel.app/);
         return socket;
     } catch (error) {
         console.error('Socket connection error:', error);
