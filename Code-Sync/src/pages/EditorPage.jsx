@@ -1,5 +1,3 @@
-// src/pages/EditorPage.js
-
 import React, { useEffect, useRef, useState } from 'react';
 import Client from '../components/Client';
 import Editor from '../components/Editor';
@@ -19,44 +17,60 @@ const EditorPage = () => {
   const [clients, setClients] = useState([]);
 
   useEffect(() => {
-    const username = location.state?.username;
+    const init = async () => {
+      socketRef.current = await initSocket();
 
-    if (!username) {
-      reactNavigator('/');
-      return;
-    }
+      socketRef.current.on('connect_error', (err) => handleErrors(err));
+      socketRef.current.on('connect_failed', (err) => handleErrors(err));
 
-    socketRef.current = initSocket(roomId, username);
-
-    socketRef.current.on(ACTIONS.JOINED, ({ clients, username, socketId }) => {
-      if (username !== location.state?.username) {
-        toast.success(`${username} joined the room.`);
+      function handleErrors(e) {
+        toast.error('Socket connection failed, try again later.');
+        reactNavigator('/');
       }
-      setClients(clients);
-      socketRef.current.emit(ACTIONS.SYNC_CODE, {
-        code: codeRef.current,
-        socketId,
-      });
-    });
 
-    socketRef.current.on(ACTIONS.DISCONNECTED, ({ socketId, username }) => {
-      toast.success(`${username} left the room.`);
-      setClients((prev) => {
-        return prev.filter((client) => client.socketId !== socketId);
+      socketRef.current.emit(ACTIONS.JOIN, {
+        roomId,
+        username: location.state?.username,
       });
-    });
 
-    return () => {
-      socketRef.current.disconnect();
+      // Listening for joined events
+      socketRef.current.on(ACTIONS.JOINED, ({ clients, username, socketId }) => {
+        if (username !== location.state?.username) {
+          toast.success(`${username} joined the room.`);
+        }
+        setClients(clients);
+        socketRef.current.emit(ACTIONS.SYNC_CODE, {
+          code: codeRef.current,
+          socketId
+        });
+      });
+
+      //listening for disconnected
+      socketRef.current.on(ACTIONS.DISCONNECTED, ({ socketId, username }) => {
+        toast.success(`${username} left the room.`);
+        setClients((prev) => {
+          return prev.filter((client) => client.socketId !== socketId);
+        });
+      });
+
     };
-  }, [roomId, location.state?.username, reactNavigator]);
+
+    init();
+    
+    return () => {
+      socketRef.current?.disconnect();
+      socketRef.current?.off(ACTIONS.JOINED);
+      socketRef.current?.off(ACTIONS.DISCONNECTED);
+    };
+
+  }, []);
 
   async function copyRoomId() {
     try {
       await navigator.clipboard.writeText(roomId);
-      toast.success('Room ID has been copied!');
+      toast.success("Room ID has been copied!");
     } catch (err) {
-      toast.error('Could not copy the Room ID');
+      toast.error("Could not copy the Room ID");
     }
   }
 
