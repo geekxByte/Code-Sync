@@ -8,7 +8,7 @@ export const initSocket = async () => {
     };
 
     try {
-        const socket = io(https://code-sync-olive.vercel.app/);
+        const socket = io('https://code-sync-olive.vercel.app/', options);
         return socket;
     } catch (error) {
         console.error('Socket connection error:', error);
